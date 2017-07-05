@@ -1,0 +1,63 @@
+
+*
+  transition: ease-in-out .2s
+=desktop()
+  @media screen and (min-width: 990px)
+    @content
+=ultra()
+  @media screen and (min-width: 1921px)
+    @content
+=mobile()
+  @media screen and (max-width: 989px)
+    @content
+=laptop()
+  @media screen and (min-width: 990px) and (max-width: 1412px)
+    @content
+=tablet()
+  @media screen and (max-width: 990px) and (min-width: 550px)
+    @content
+
+// Color Variables
+
+$green: #1abc9c
+$tan: #e0ddd7
+
+
+// Styling Classes
+
+.uppercase
+  text-transform: uppercase
+$ff: 'ff-good-headline-web-pro-con'
+
+
+// CSS imports
+
+@import header
+@import hero
+@import login
+
+//font import
+
+@import url('https://fonts.googleapis.com/css?family=Fjalla+One|Montserrat|Roboto+Condensed')
+
+
+// Global Styles
+
+body
+  font-family: 'Roboto Condensed', sans-serif
+  padding: 0
+  margin: 0
+  text-align: center
+  box-sizing: border-box
+  background-color: white
+  display: flex
+  justify-content: center
+  align-items: center
+
+  .hidden
+    display: none !important
+  #root
+    width: 100%
+    a
+      text-decoration: none
+      color: black
