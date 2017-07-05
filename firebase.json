@@ -1,0 +1,35 @@
+{
+  // "rules": {
+    
+  //   ".read": true,
+  //   ".write": true
+  // },
+    "hosting": {
+    "public": "./",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "functions"
+    ]
+  },
+      "rules":{
+        "users":{
+          ".read": true,
+          ".write": true      
+        }
+    },
+  "posts":{
+    "hello": true
+  },
+  "users":{
+
+    "$username":{
+      "uid": true,
+      "name": true,
+      "email": true
+    }
+  } 
+  
+
+}
