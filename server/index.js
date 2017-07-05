@@ -16,20 +16,19 @@ const config = {
 firebase.initializeApp(config);
 const database = firebase.database();
 
-const email = 'hello@world.com';
-const password = 'password';
 
+/* a sample login. Uncomment these 3 lines or post a new user to the endpoint to login via the current email/password paradigm */
+// const email = 'hello@world.com';
+// const password = 'password';
 // firebase.auth().signInWithEmailAndPassword(email, password).catch(err => console.error(err));
 
+/*this function is run whenever firebase detects a change in user authentication status*/
 firebase.auth().onAuthStateChanged((user) => {
   if(user){
-    console.log(`${user.name} signed in!`);
-    console.log(user.providerData[0].email);
-    let name = user.name;
-    let email = user.email;
-    let uid = user.uid;
-    let providerData = user.providerData;
-    
+    return database.ref('users').child(user.uid).once('value').then(snapshot => {
+      let obj = snapshot.val();
+      console.log(obj.name + ' signed in!');
+    });    
   } else {
     console.log('no user signed in');
   }
@@ -40,49 +39,35 @@ app.use(express.static(path.resolve(__dirname, '../client/build')));
 
 app.use(bodyParser.json());
 
-app.post('/', (req, res) => {
+/* adds a questions to the questions database
+  TODO: structure our general data. This endpoint may not be used in the final iteration
+ */
+app.post('/questions', (req, res) => {
 
-  // let key = firebase.database().ref().push().key();
-  database.ref('posts').set({
+  database.ref('questions').set({
     hello: 'world1'
   });
   return res.status('201').json();
 });
 
+/**our User Creation endpoint - creates the user in firebase's auth system and adds a reference to our database*/
 app.post('/users', (req, res) => {
-  let user = firebase.auth().currentUser;
-
-  if(!user){
-    firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
+  firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
     .then(() => firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password))
     .then(() => firebase.auth().currentUser)
-    .then(user => firebase.database().ref('users').child(req.body.username).set({
+    .then(user => firebase.database().ref('users').child(user.uid).set({
       uid: user.uid,
-      name: 'hello',
-      email: req.body.email
+      name: req.body.name,
+      email: req.body.email,
+      username: req.body.username
     }))
-    .catch(err => console.error(err))
-    // let user = firebase.auth().currentUser;
-    // console.log(user);
-    // firebase.database().ref().child('users/' + req.body.username).set({
-    //   uid: user.uid,
-    //   name: 'hello',
-    //   email: req.body.email
-    // });
-    return res.status('201').json();
-
-  } else {
-    firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password).catch(err => console.error(err));
-    return res.status('200').json('logged in!'); 
-  }
-  // let token = user.getIdToken();
-  // console.log(token);
-  // firebase.database().ref('users')
-  
+    .catch(err => console.error(err));
+  return res.status('201').json(`${req.body.username} created!`);
 });
 
+/* returns list of questions */
 app.get('/', (req, res) => {
-  firebase.database().ref('posts').once('value').then(snapshot => {
+  firebase.database().ref('questions').once('value').then(snapshot => {
     console.log(snapshot.val());
     return res.status('200').json(snapshot.val())
     .catch(err => console.error(err));
@@ -90,6 +75,7 @@ app.get('/', (req, res) => {
 
 });
 
+/*returns list of users from the database */
 app.get('/users', (req, res) => {
   firebase.database().ref('users').once('value').then(snapshot => {
     return res.status('200').json(snapshot.val());

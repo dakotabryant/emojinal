@@ -19,7 +19,7 @@
           ".write": true      
         }
     },
-  "posts":{
+  "questions":{
     "hello": true
   },
   "users":{
