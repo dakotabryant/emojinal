@@ -1,6 +1,6 @@
 const initialState = {
     loading: null,
-    loggingIn: true,
+    loggingIn: false,
     error: null,
     currentUser: {
         name: '',
@@ -21,6 +21,11 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 loggingIn: true
+            }
+        case 'CANCEL_LOGIN':
+            return {
+                ...state,
+                loggingIn: false
             }
         default:
             return state;
