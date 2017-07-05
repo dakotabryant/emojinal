@@ -22,13 +22,23 @@ const database = firebase.database();
 // const password = 'password';
 // firebase.auth().signInWithEmailAndPassword(email, password).catch(err => console.error(err));
 
-/*this function is run whenever firebase detects a change in user authentication status*/
+/*this function is run whenever firebase detects a change in user authentication status
+  TODO: fix promise chain so that the user that logged in is available. This promise structure was working, but another change caused a regression
+  currently the snapshot.val() here returns null, though the querry is correct, and the log of the uid matches a log in the post endpoint
+  Various structures of async have been tried.
+*/
 firebase.auth().onAuthStateChanged((user) => {
+  console.log(user.uid);
   if(user){
-    return database.ref('users').child(user.uid).once('value').then(snapshot => {
-      let obj = snapshot.val();
-      console.log(obj.name + ' signed in!');
-    });    
+    return database.ref('users').child(user.uid).once('value')
+    .then(snapshot => console.log(snapshot.val()))
+    // .then(obj => console.log(snapshot.val()))
+      // console.log(obj);
+      // console.log(snapshot);
+      // console.log(obj.name + ' signed in!');
+    
+    .catch(err => console.error(err));   
+    // console.log(obj);
   } else {
     console.log('no user signed in');
   }
@@ -55,12 +65,12 @@ app.post('/users', (req, res) => {
   firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
     .then(() => firebase.auth().signInWithEmailAndPassword(req.body.email, req.body.password))
     .then(() => firebase.auth().currentUser)
-    .then(user => firebase.database().ref('users').child(user.uid).set({
+    .then(user =>{ console.log(user.uid); database.ref('users').child(user.uid).set({
       uid: user.uid,
       name: req.body.name,
       email: req.body.email,
       username: req.body.username
-    }))
+    })})
     .catch(err => console.error(err));
   return res.status('201').json(`${req.body.username} created!`);
 });
