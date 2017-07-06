@@ -4,3 +4,6 @@ export const userLoginRequest = () => ({
 export const initiateLogIn = () => ({
     type: 'INITIATE_LOGIN'
 })
+export const cancelLogIn = () => ({
+    type: 'CANCEL_LOGIN'
+})
