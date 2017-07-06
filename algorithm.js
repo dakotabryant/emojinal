@@ -7,7 +7,7 @@ class Deck{
     if(typeof timeFunction !== "undefined"){
       this.timeFunction = timeFunction;
     }else{
-      //default times
+      //default times to increase due date by
       this.timeFunction = {
         soon: 3600000,
         soonish: 28800000,

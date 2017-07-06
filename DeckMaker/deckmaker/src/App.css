@@ -1,0 +1,63 @@
+*{
+  box-sizing: border-box;
+}
+
+html{
+  background: #EEE;
+  min-height: 100%;
+}
+
+#dropzone{
+  min-width: 100%;
+  border: 0;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #454;
+  padding: 20px;
+  color: #EEE;
+  border-bottom: 10px solid black;
+}
+
+.main form{
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.entry{
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+  border: 2px solid #232;
+  border-radius: 10px;
+  font-size: 16px;
+  box-shadow: 0 0 7px black;
+}
+
+.entry:last-of-type{
+  margin-bottom: 0;
+}
+
+.entry form{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.entry form input{
+  border-radius: 5px;
+  margin: 2px;
+  width: 100%;
+}
+
+button{
+  width: 70%;
+  margin:5px 25px;
+  border-radius: 5px;
+}
