@@ -23,16 +23,16 @@ class Deck{
     this.subject = data.subject;
     this.deck = this.makeDeck();
     this.populateDeck(data);
-    this.stageCards(5);
+    this.stageCards(5, this.deck);
   }
 
   /** Pushes the question to the next queue as needed and toggles learning state
   * @param {object} card - Optionally the node in the queue to use.  Defaults to first card of 'now'
   */
-  answeredQuestionCorrectly(card = this.fetchFirst("now")){
+  answeredQuestionCorrectly(card = this.fetchFirst("now"), deck=this.deck){
     if(card.study){
       card.study = false;
-      this.switchStack("now", "soon")
+      this.switchStack("now", "soon", deck)
     }else{
       card.due = Date.now();
       card.due += card.currentStack === "now" ? this.timeFunction.soon :
@@ -45,7 +45,7 @@ class Deck{
             card.currentStack === "soonish" ? "later" :
               "learned";
 
-      this.switchStack("now", card.currentStack);
+      this.switchStack("now", card.currentStack, deck);
     }
   }
 
@@ -63,9 +63,9 @@ class Deck{
   */
   checkStackforDueCards(target, deck = this.deck){
     if(deck[target]){
-      if(this.fetchFirst(target).due < Date.now()){
-        this.switchStack(target, "now");
-        this.checkStackforDueCards(target);
+      if(this.fetchFirst(target, deck).due < Date.now()){
+        this.switchStack(target, "now", deck);
+        this.checkStackforDueCards(target, deck);
       }
     }
   }
@@ -173,7 +173,7 @@ class Deck{
     for(let i=0;i<num;i++){
       this.switchStack("unstaged", "now", deck);
     }
-    this.deck.counts["now"] += num;
+    deck.counts["now"] += num;
   }
 
   /** Move face card from one stack to the end of another and manage count
@@ -184,8 +184,8 @@ class Deck{
   switchStack(origin, target,deck=this.deck){
     let item = this.shift(origin, deck);
     if(origin != "unstaged"){
-      this.deck.counts[origin] -= 1;
-      this.deck.counts[target] += 1;
+      deck.counts[origin] -= 1;
+      deck.counts[target] += 1;
     }
     this.push(item, target, deck);
 
