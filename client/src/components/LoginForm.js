@@ -1,7 +1,12 @@
 import React from 'react';
 import AuthIcons from './AuthIcons';
+import {connect} from 'react-redux';
+import {googleLoginRequest} from '../actions'
 
 class LoginForm extends React.Component {
+    logInToGoogle() {
+        return this.props.dispatch(googleLoginRequest())
+    }
     render() {
     return (
         <div className="inputWrapper">
@@ -15,7 +20,7 @@ class LoginForm extends React.Component {
             </div>
             <button onClick={this.props.onClick}>Log In</button>
             <div className="auth-container">
-                <AuthIcons image={require("../assets/images/google_logo1600.png")} className={"google"}></AuthIcons>
+                <AuthIcons onClick={this.logInToGoogle.bind(this)} image={require("../assets/images/google_logo1600.png")} className={"google"}></AuthIcons>
                 
             </div>
         </div>
@@ -23,7 +28,6 @@ class LoginForm extends React.Component {
     }
 }
 
-export default LoginForm;
 
-// <img src={require("../assets/images/google_logo1600.png")} alt=""/>
-//                 <img src={require("../assets/images/github-512.png")} alt=""/>
+
+export default connect()(LoginForm)

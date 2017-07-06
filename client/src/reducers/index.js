@@ -1,11 +1,9 @@
 const initialState = {
     loading: null,
     loggingIn: false,
+    loggedIn: false,
     error: null,
-    currentUser: {
-        name: '',
-        uid: '',
-    },
+    currentUser: {},
     currentQuestion: 0,
     questions: []
 }
@@ -16,6 +14,19 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: true
+            }
+        case 'USER_LOGIN_SUCCESS':
+            return {
+                ...state,
+                loading: false,
+                loggedIn: true,
+                currentUser: {...action.user}
+            }
+        case 'USER_LOGIN_FAILURE':
+            return {
+                ...state,
+                loading: false,
+                loggedIn: false
             }
         case 'INITIATE_LOGIN':
             return {

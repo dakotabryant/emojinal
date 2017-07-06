@@ -2,7 +2,7 @@ import React from 'react';
 
 const AuthIcons = (props) => {
     return (
-        <div className={props.className}>
+        <div onClick={props.onClick} className={props.className}>
             <img src={props.image} alt=""/>
         </div>
     );
