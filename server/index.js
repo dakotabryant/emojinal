@@ -13,6 +13,7 @@ const config = {
   storageBucket: 'emojinal-61d05.appspot.com',
   messagingSenderId: '433898361666'
 };
+
 firebase.initializeApp(config);
 const database = firebase.database();
 

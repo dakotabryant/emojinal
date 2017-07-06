@@ -3,12 +3,13 @@ import Header from './Header';
 import LoginForm from './LoginForm';
 import {ContentSections} from './common'
 import {connect} from 'react-redux';
-import {initiateLogIn} from '../actions'
+import {initiateLogIn, userLoginRequest} from '../actions'
 
 class App extends React.Component {
+    
     renderContent() {
         if(this.props.loggingIn) {
-            return <LoginForm></LoginForm>
+            return <LoginForm onClick={this.logInRequest.bind(this)}></LoginForm>
         }
         return (<div>
                     <h1>Emojinal</h1>
@@ -20,6 +21,9 @@ class App extends React.Component {
     }
     logIn() {
         this.props.dispatch(initiateLogIn())
+    }
+    logInRequest() {
+        this.props.dispatch(userLoginRequest())
     }
     render() {
         return (

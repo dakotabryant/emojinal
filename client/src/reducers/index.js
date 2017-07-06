@@ -25,7 +25,8 @@ const reducer = (state = initialState, action) => {
         case 'CANCEL_LOGIN':
             return {
                 ...state,
-                loggingIn: false
+                loggingIn: false,
+                loading: false
             }
         default:
             return state;
