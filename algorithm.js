@@ -100,16 +100,16 @@ class Deck{
 
   }
 
-  /** Takes a list and pops an element off the end.
-  * @param {string} target - The string name of the queue being targeted
-  * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
-  */
-  pop(target, deck = this.deck){
-    let item = deck[target];
-    item.parent.child = null;
-    item.parent = null;
-    return item;
-  }
+  // /** Takes a list and pops an element off the end.
+  // * @param {string} target - The string name of the queue being targeted
+  // * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
+  // */
+  // pop(target, deck = this.deck){
+  //   let item = deck[target];
+  //   item.parent.child = null;
+  //   item.parent = null;
+  //   return item;
+  // }
 
   /** Takes a list and removes the first item from it.
   * @param {string} target - The string name of the queue being targeted
@@ -119,11 +119,9 @@ class Deck{
     let item = this.fetchFirst(target, deck);
     if(deck[target].child){
         deck[target] = deck[target].child;
-        deck[target].parent = null;
     }else{
       deck[target] = null
     }
-    item.parent = null;
     item.child = null;
     return item;
   }
@@ -140,7 +138,6 @@ class Deck{
       deck[target] = card;
     }else{
       head.child = card;
-      head.child.parent = head;
     }
   }
 
@@ -195,12 +192,10 @@ class Deck{
   }
 
   // NOTE: I've toggled study to false so that I can test the code.
-  /** Makes a card given the cardData.  If no parent passed in, it is assumed to be root node
+  /** Makes a card given the cardData.
   * @param {object} cardData - The data with which to make a card
-  * @param {object} parent - The parent card.  Defaults to null, which means that the queue is empty.  You should almost always call it with a parent argument.
   */
-  makeCard(cardData,parent = null){
-    cardData.parent = parent;
+  makeCard(cardData){
     cardData.child = null;
     cardData.due = null;
     cardData.study = false;
