@@ -50,11 +50,11 @@ class Deck{
   }
 
   /** Moves card to end of stack and resets the currentStack*/
-  answeredQuestionIncorrectly(){
+  answeredQuestionIncorrectly(deck = this.deck){
     //move the card to the end of the queue
-    let failedCard = this.shift("now");
+    let failedCard = this.shift("now", deck);
     failedCard.currentStack = "now";
-    this.fetchEnd("now").child = failedCard;
+    this.fetchEnd("now", deck).child = failedCard;
   }
 
   /** Check a stack for whether the face card's due time is less than now
@@ -132,7 +132,7 @@ class Deck{
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
   push(card, target, deck = this.deck){
-    let head = this.fetchEnd(target);
+    let head = this.fetchEnd(target,deck);
     //if first element does not exist yet, make it
     if(!head){
       deck[target] = card;
