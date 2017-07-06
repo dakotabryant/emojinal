@@ -1,0 +1,14 @@
+{
+  "name": "The Modern Language",
+  "description": "All the language you must know to understand the modern world.",
+  "deck": [
+    {"question":"bb",
+      "answer": "Big Brother",
+      "wrongAnswers": ["Boing Boing", "crimethink", "A playful name for a lover."]
+    },
+    {"question":"bobby",
+      "answer": "Brown",
+      "wrongAnswers": ["Boing Boing", "crimethink", "A playful name for a lover."]
+    }
+  ]
+}
