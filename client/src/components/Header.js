@@ -14,7 +14,7 @@ class Header extends Component {
         if(this.props.loggingIn) {
             return <button onClick={this.cancelLogIn.bind(this)}>Cancel Log In</button>
         }
-        return <button onClick={this.logIn.bind(this)}>Log In</button>
+        return <button onClick={this.logIn.bind(this)}>{`Are you logged in? ${this.props.loggedIn}`}</button>
     }
 
     render() {
@@ -28,7 +28,8 @@ class Header extends Component {
 
 export const mapStateToProps = (state, ownProps) => {
     return {
-        loggingIn: state.loggingIn
+        loggingIn: state.loggingIn,
+        loggedIn: state.loggedIn
     }
 }
 
