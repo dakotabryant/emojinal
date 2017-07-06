@@ -4,12 +4,13 @@
 /** A deck which contains cards sorted into several decks and helper functions. */
 class Deck{
   constructor(data, timeFunction){
+
     if(typeof timeFunction !== "undefined"){
       this.timeFunction = timeFunction;
     }else{
       //default times to increase due date by
       this.timeFunction = {
-        soon: 3600000,
+        soon: 360000,
         soonish: 28800000,
         later: 86400000,
         learned: 2592000000
@@ -28,25 +29,40 @@ class Deck{
       card.study = false;
       this.switchStack("now", "soon")
     }else{
-      card.currentStack =
-        card.currentStack === "now" ? "soon" :
-          card.currentStack === "soon" ? "soonish" :
-            card.currentStack === "soonish" ? "later" :
-              "learned";
       card.due = Date.now();
       card.due += card.currentStack === "now" ? this.timeFunction.soon :
         card.currentStack === "soon" ? this.timeFunction.soonish :
           card.currentStack === "soonish" ? this.timeFunction.later :
             this.timeFunction.learned;
+      card.currentStack =
+        card.currentStack === "now" ? "soon" :
+          card.currentStack === "soon" ? "soonish" :
+            card.currentStack === "soonish" ? "later" :
+              "learned";
 
       this.switchStack("now", card.currentStack);
     }
   }
 
+  answeredQuestionIncorrectly(card = this.fetchFirst("now")){
+    //move the card to the end of the queue
+    let failedCard = this.shift("now");
+    failedCard.currentStack = "now";
+    this.fetchEnd("now").child = failedCard;
 
+  }
+
+  checkStackforDueCards(target, deck = this.deck){
+    if(deck[target]){
+      if(this.fetchFirst(target).due < Date.now()){
+        this.switchStack(target, "now");
+        this.checkStackforDueCards(target);
+      }
+    }
+  }
 
   populateDeck(data){
-    data.cards.forEach(el => {
+    data.deck.forEach(el => {
       this.add(el, "unstaged");
     })
   }
@@ -68,9 +84,13 @@ class Deck{
   /** Takes a list and removes the first item from it. */
   shift(target, deck = this.deck){
     let item = this.fetchFirst(target, deck);
-    //console.log(deck[target])
-    deck[target] = deck[target].child;
-    deck[target].parent = null;
+    //console.log(item)
+    if(deck[target].child){
+        deck[target] = deck[target].child;
+        deck[target].parent = null;
+    }else{
+      deck[target] = null
+    }
     item.parent = null;
     item.child = null;
     return item;
@@ -107,14 +127,19 @@ class Deck{
 
   stageCards(num = 1, deck = this.deck){
     for(let i=0;i<num;i++){
-      console.log("ran")
       this.switchStack("unstaged", "now", deck);
     }
+    this.deck.counts["now"] += num;
   }
 
   switchStack(origin, target,deck=this.deck){
     let item = this.shift(origin, deck);
+    if(origin != "unstaged"){
+      this.deck.counts[origin] -= 1;
+      this.deck.counts[target] += 1;
+    }
     this.push(item, target, deck);
+
   }
 
   // NOTE: I've toggled study to false so that I can test the code.
@@ -135,7 +160,7 @@ class Deck{
         soon: 0,
         soonish: 0,
         later: 0,
-        memorized: 0
+        learned: 0
       },
       now: null,
       //two hours
@@ -155,7 +180,7 @@ class Deck{
 let d = {
   name: "The Modern Language",
   subject: "All the language you must know to understand the modern world.",
-  cards: [
+  deck: [
     {question:"bb",
       answer: "Big Brother",
       wrongAnswers: ["Boing Boing", "crimethink", "A playful name for a lover."]
