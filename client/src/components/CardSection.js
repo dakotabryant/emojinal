@@ -3,6 +3,9 @@ import { connect } from 'react-redux';
 import { getFirst, createMockData } from '../actions';
 
 class CardSection extends Component {
+  state = {
+    selectedOption: 'option1'
+  }
   _getQuestions = () => {
     let user = {
       displayName: this.props.currentUser.displayName,
@@ -10,6 +13,9 @@ class CardSection extends Component {
     };
     this.props.dispatch(getFirst(user));
   };
+  _submitAnswer = () => {
+    
+  }
   render() {
     const { wrongAnswers, correctAnswer, questionText } = this.props.question;
     console.log(wrongAnswers);
@@ -17,7 +23,7 @@ class CardSection extends Component {
       return (
         <label htmlFor={answer}>
           {answer}
-          <input type="radio" name={answer} />
+          <input type="radio" name="questions" />
         </label>
       );
     });
@@ -26,7 +32,7 @@ class CardSection extends Component {
     );
     if (this.props.question.correctAnswer != null) {
       cardSectionContent = (
-        <div>
+        <div className="form-section">
           <form>
             <p>
               {questionText}
@@ -34,12 +40,12 @@ class CardSection extends Component {
             <div>
               <label htmlFor="correctAnswer">
                 {correctAnswer}
-                <input type="radio" name={correctAnswer} />
+                <input id="correctAnswer" type="radio" name="questions" />
               </label>
               {answers}
             </div>
           </form>
-          <button onClick={console.log('clicked')}>Submit Answer</button>
+          <button onClick={this._submitAnswer}>Submit Answer</button>
         </div>
       );
     }
