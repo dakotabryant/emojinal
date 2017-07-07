@@ -1,29 +1,52 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { getFirst, createMockData } from '../actions';
+import {
+  getFirst,
+  createMockData,
+  correctAnswer,
+  incorrectAnswer
+} from '../actions';
 
 class CardSection extends Component {
   state = {
-    selectedOption: 'option1'
-  }
+    inputValue: ''
+  };
   _getQuestions = () => {
     let user = {
       displayName: this.props.currentUser.displayName,
       uid: this.props.currentUser.uid
     };
-    this.props.dispatch(getFirst(user));
+    this.props.dispatch(createMockData(user));
   };
-  _submitAnswer = () => {
-    
+  handleOptionChange(event) {
+    this.setState({
+      inputValue: event.target.value
+    });
+  }
+  _handleAnswerSubmit = () => {
+    let user = {
+      displayName: this.props.currentUser.displayName,
+      uid: this.props.currentUser.uid
+    };
+    if (this.state.inputValue === this.props.question.correctAnswer) {
+      return this.props.dispatch(correctAnswer(user));
+    } else {
+      return this.props.dispatch(incorrectAnswer(user));
+    }
   }
   render() {
     const { wrongAnswers, correctAnswer, questionText } = this.props.question;
-    console.log(wrongAnswers);
-    const answers = wrongAnswers.map(answer => {
+    const answers = wrongAnswers.map((answer) => {
       return (
-        <label htmlFor={answer}>
+        <label key={answer} htmlFor={answer}>
           {answer}
-          <input type="radio" name="questions" />
+          <input
+            type="radio"
+            name="questions"
+            value={answer}
+            checked={this.state.inputValue === { answer }}
+            onChange={event => this.handleOptionChange(event)}
+          />
         </label>
       );
     });
@@ -40,12 +63,18 @@ class CardSection extends Component {
             <div>
               <label htmlFor="correctAnswer">
                 {correctAnswer}
-                <input id="correctAnswer" type="radio" name="questions" />
+                <input
+                  type="radio"
+                  name="questions"
+                  value={correctAnswer}
+                  checked={this.state.inputValue === { correctAnswer }}
+                  onChange={event => this.handleOptionChange(event)}
+                />
               </label>
               {answers}
             </div>
           </form>
-          <button onClick={this._submitAnswer}>Submit Answer</button>
+          <button onClick={this._handleAnswerSubmit}>Submit Answer</button>
         </div>
       );
     }

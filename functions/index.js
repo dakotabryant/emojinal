@@ -573,49 +573,52 @@ exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
 // });
 
 exports.correctAnswer = functions.https.onRequest((req, res) => {
-  admin
-    .database()
-    .ref('/decks')
-    .child(req.params.uid)
-    .once('value')
-    .then(snapshot => {
-      let dbDeck = snapshot.val();
-      let phDeck = new Deck(d);
-      phDeck.answeredQuestionCorrectly(dbDeck);
-      return dbDeck;
-    })
-    .then(dbDeck => {
-      admin
-        .database()
-        .ref('/decks')
-        .child(req.params.uid)
-        .set({ deck: dbDeck });
-    })
-    .then(() => res.status('200').send())
-    .catch(err => console.error(err));
+  cors(req, res, () => {
+    let ref = admin.database().ref(`/decks/${req.body.uid}`);
+    ref
+      .once('value')
+      .then(snap => {
+        let dbDeck = snap.val();
+        let phDeck = new Deck(d);
+        phDeck.answeredQuestionCorrectly(dbDeck.deck['now'], dbDeck.deck);
+        return dbDeck;
+      })
+      .then(dbDeck => {
+        ref.set({ deck: dbDeck });
+      })
+      .then(() => ref.once('value'))
+      .then(snap => {
+        let phDeck = new Deck(d);
+        return phDeck.fetchFirst('now', snap.val().deck);
+      })
+      .then(item => res.status('201').json(item))
+      .catch(err => console.error(err));
+  });
 });
 exports.incorrectAnswer = functions.https.onRequest((req, res) => {
-  admin
-    .database()
-    .ref('/decks')
-    .child(req.params.uid)
-    .once('value')
-    .then(snapshot => {
-      let dbDeck = snapshot.val();
-      let phDeck = new Deck(d);
-      phDeck.answeredQuestionIncorrectly(dbDeck);
-      return dbDeck;
-    })
-    .then(dbDeck => {
-      admin
-        .database()
-        .ref('/decks')
-        .child(req.params.uid)
-        .set({ deck: dbDeck });
-    })
-    .then(() => res.status('200').send())
-    .catch(err => console.error(err));
+  cors(req, res, () => {
+    let ref = admin.database().ref(`/decks/${req.body.uid}`);
+    ref
+      .once('value')
+      .then(snap => {
+        let dbDeck = snap.val();
+        let phDeck = new Deck(d);
+        phDeck.answeredQuestionIncorrectly(dbDeck.deck['now'], dbDeck.deck);
+        return dbDeck;
+      })
+      .then(dbDeck => {
+        ref.set({ deck: dbDeck });
+      })
+      .then(() => ref.once('value'))
+      .then(snap => {
+        let phDeck = new Deck(d);
+        return phDeck.fetchFirst('now', snap.val().deck);
+      })
+      .then(item => res.status('201').json(item))
+      .catch(err => console.error(err));
+  });
 });
+
 exports.getFirst = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
     admin
@@ -625,11 +628,11 @@ exports.getFirst = functions.https.onRequest((req, res) => {
       .once('value')
       .then(snapshot => {
         let dbDeck = snapshot.val();
-        console.log(`this is the dbDeck: ${dbDeck}`)
+        console.log(`this is the dbDeck: ${dbDeck}`);
         let phDeck = new Deck(d);
-        console.log(`this is the phDeck: ${phDeck}`)
+        console.log(`this is the phDeck: ${phDeck}`);
         let newDeck = phDeck.fetchFirst('now', dbDeck.deck);
-        console.log(`this is the newDeck: ${newDeck}`)
+        console.log(`this is the newDeck: ${newDeck}`);
 
         return res.status(200).json(newDeck).end();
       })
@@ -658,7 +661,7 @@ exports.createMockData = functions.https.onRequest((req, res) => {
     let obj = req.body;
     const ref = admin.database().ref('/decks').child(obj.uid);
     return ref
-      .set(obj)
+      .update(obj)
       .then(() => {
         return ref.once('value');
       })
