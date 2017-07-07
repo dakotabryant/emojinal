@@ -1,7 +1,15 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import {createMockData} from '../actions';
 
 class CardSection extends Component {
+  _sendUser = () => {
+    let user = {
+      displayName: this.props.currentUser.displayName,
+      uid: this.props.currentUser.uid,
+    }
+    this.props.dispatch(createMockData(user))
+  }
   render() {
     const { wrongAnswers, correctAnswer, questionText } = this.props.question;
     const answers = wrongAnswers.map(answer => {
@@ -12,6 +20,7 @@ class CardSection extends Component {
       );
     });
     return (
+      <div>
       <form>
         <p>
           {questionText}
@@ -22,15 +31,17 @@ class CardSection extends Component {
           </label>
           {answers}
         </div>
-        <button type='submit'>Submit Answer</button>
       </form>
+        <button onClick={this._sendUser}>Submit Answer</button>
+      </div>
     );
   }
 }
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    question: state.currentQuestion
+    question: state.currentQuestion,
+    currentUser: state.currentUser
   };
 };
 

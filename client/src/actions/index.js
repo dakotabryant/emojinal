@@ -1,11 +1,9 @@
 import firebase from 'firebase';
 import store from '../store';
 
-const provider = new firebase.auth.GoogleAuthProvider();
+const cloudFunctions = 'https://us-central1-emojinal-61d05.cloudfunctions.net/';
 
-export const initiateLogIn = () => ({
-  type: 'INITIATE_LOGIN'
-});
+const provider = new firebase.auth.GoogleAuthProvider();
 export const showLoginForm = () => ({
   type: 'SHOW_LOGIN_FORM'
 });
@@ -31,6 +29,24 @@ export const userLoginSuccess = user => {
 export const userLoginFailure = () => ({
   type: 'USER_LOGIN_FAILURE'
 });
+export const getQuestion = uid => {
+  fetch(`${cloudFunctions}getFirst`).then(res => {});
+};
+
+const headers = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json'
+};
+
+export const createMockData = user => {
+  fetch(`${cloudFunctions}createMockData`, {
+    headers,
+		method: 'put',
+    body: JSON.stringify(user)
+  }).then(res => {
+    return res;
+  });
+};
 
 export const googleLoginRequest = () => {
   store.dispatch(userLoginRequest());

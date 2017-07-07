@@ -1,22 +1,6 @@
-Skip to content
- 
-Search…
-All gists
-GitHub
-New gist
-@dakotabryant
-  Star 0
-  Fork 0
-  @htwrighthtwright/cloud function scratch
-Created 2 hours ago
-Embed  
-<script src="https://gist.github.com/htwright/50df44ab9004852e44b013054086674d.js"></script>
-  Download ZIP
- Code  Revisions 1
-Raw
- cloud function scratch
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const cors = require('cors');
 // const Deck = require('./algo');
 admin.initializeApp(functions.config().firebase);
 //this is a temp file for experimenting with the datastructure and
@@ -26,12 +10,11 @@ admin.initializeApp(functions.config().firebase);
 * @param {object} data - The data you want to make a deck with
 * @param {object} timeFunction - An optional argument that determines how long a wait each category has before card is due
 */
-class Deck{
-  constructor(data, timeFunction){
-
-    if(typeof timeFunction !== 'undefined'){
+class Deck {
+  constructor(data, timeFunction) {
+    if (typeof timeFunction !== 'undefined') {
       this.timeFunction = timeFunction;
-    }else{
+    } else {
       //default times to increase due date by
       this.timeFunction = {
         soon: 360000,
@@ -50,28 +33,33 @@ class Deck{
   /** Pushes the question to the next queue as needed and toggles learning state
   * @param {object} card - Optionally the node in the queue to use.  Defaults to first card of 'now'
   */
-  answeredQuestionCorrectly(card = this.fetchFirst('now')){
-    if(card.study){
+  answeredQuestionCorrectly(card = this.fetchFirst('now')) {
+    if (card.study) {
       card.study = false;
       this.switchStack('now', 'soon');
-    }else{
+    } else {
       card.due = Date.now();
-      card.due += card.currentStack === 'now' ? this.timeFunction.soon :
-        card.currentStack === 'soon' ? this.timeFunction.soonish :
-          card.currentStack === 'soonish' ? this.timeFunction.later :
-            this.timeFunction.learned;
+      card.due +=
+        card.currentStack === 'now'
+          ? this.timeFunction.soon
+          : card.currentStack === 'soon'
+            ? this.timeFunction.soonish
+            : card.currentStack === 'soonish'
+              ? this.timeFunction.later
+              : this.timeFunction.learned;
       card.currentStack =
-        card.currentStack === 'now' ? 'soon' :
-          card.currentStack === 'soon' ? 'soonish' :
-            card.currentStack === 'soonish' ? 'later' :
-              'learned';
+        card.currentStack === 'now'
+          ? 'soon'
+          : card.currentStack === 'soon'
+            ? 'soonish'
+            : card.currentStack === 'soonish' ? 'later' : 'learned';
 
       this.switchStack('now', card.currentStack);
     }
   }
 
   /** Moves card to end of stack and resets the currentStack*/
-  answeredQuestionIncorrectly(){
+  answeredQuestionIncorrectly() {
     //move the card to the end of the queue
     let failedCard = this.shift('now');
     failedCard.currentStack = 'now';
@@ -82,9 +70,9 @@ class Deck{
   * @param {string} target - The queue's name that is being targeted
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  checkStackforDueCards(target, deck = this.deck){
-    if(deck[target]){
-      if(this.fetchFirst(target).due < Date.now()){
+  checkStackforDueCards(target, deck = this.deck) {
+    if (deck[target]) {
+      if (this.fetchFirst(target).due < Date.now()) {
         this.switchStack(target, 'now');
         this.checkStackforDueCards(target);
       }
@@ -94,7 +82,7 @@ class Deck{
   /** calls the checkStackforDueCards function on all stacks
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  checkAllStackforDueCards(deck = this.deck){
+  checkAllStackforDueCards(deck = this.deck) {
     this.checkStackforDueCards('soon', deck);
     this.checkStackforDueCards('soonish', deck);
     this.checkStackforDueCards('later', deck);
@@ -104,7 +92,7 @@ class Deck{
   /** populates the deck from the provided json object
   * @param {object} data - The data with which to populate the deck as an object.
   */
-  populateDeck(data){
+  populateDeck(data) {
     data.deck.forEach(el => {
       this.add(el, 'unstaged');
     });
@@ -115,10 +103,9 @@ class Deck{
   * @param {string} target - The sting name of the targeted queue
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  add(data, target, deck = this.deck){
+  add(data, target, deck = this.deck) {
     let card = this.makeCard(data);
     this.push(card, target, deck);
-
   }
 
   // /** Takes a list and pops an element off the end.
@@ -136,11 +123,11 @@ class Deck{
   * @param {string} target - The string name of the queue being targeted
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  shift(target, deck = this.deck){
+  shift(target, deck = this.deck) {
     let item = this.fetchFirst(target, deck);
-    if(deck[target].child){
+    if (deck[target].child) {
       deck[target] = deck[target].child;
-    }else{
+    } else {
       deck[target] = null;
     }
     item.child = null;
@@ -152,12 +139,12 @@ class Deck{
   * @param {string} target - The string name of the queue being targeted
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  push(card, target, deck = this.deck){
+  push(card, target, deck = this.deck) {
     let head = this.fetchEnd(target);
     //if first element does not exist yet, make it
-    if(!head){
+    if (!head) {
       deck[target] = card;
-    }else{
+    } else {
       head.child = card;
     }
   }
@@ -166,7 +153,7 @@ class Deck{
   * @param {string} target - The string name of the queue being targeted
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  fetchFirst(target, deck = this.deck){
+  fetchFirst(target, deck = this.deck) {
     return deck[target];
   }
 
@@ -174,11 +161,11 @@ class Deck{
   * @param {string} target - The string name of the queue being targeted
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  fetchEnd(target, deck = this.deck){
+  fetchEnd(target, deck = this.deck) {
     //fetches the end of the queue, so that we can stick on an element.
-    if(deck[target]){
+    if (deck[target]) {
       let current = deck[target];
-      while (current.child !== null){
+      while (current.child !== null) {
         current = current.child;
       }
       return current;
@@ -190,8 +177,8 @@ class Deck{
   * @param {integer} num - Optionally the number of cards to move from 'unstaged' to 'now'.  Defaults to 1.
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  stageCards(num = 1, deck = this.deck){
-    for(let i=0;i<num;i++){
+  stageCards(num = 1, deck = this.deck) {
+    for (let i = 0; i < num; i++) {
       this.switchStack('unstaged', 'now', deck);
     }
     this.deck.counts['now'] += num;
@@ -202,21 +189,20 @@ class Deck{
   * @param {string} target - The string name of the queue being targeted
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
-  switchStack(origin, target,deck=this.deck){
+  switchStack(origin, target, deck = this.deck) {
     let item = this.shift(origin, deck);
-    if(origin != 'unstaged'){
+    if (origin != 'unstaged') {
       this.deck.counts[origin] -= 1;
       this.deck.counts[target] += 1;
     }
     this.push(item, target, deck);
-
   }
 
   // NOTE: I've toggled study to false so that I can test the code.
   /** Makes a card given the cardData.
   * @param {object} cardData - The data with which to make a card
   */
-  makeCard(cardData){
+  makeCard(cardData) {
     cardData.child = null;
     cardData.due = null;
     cardData.study = false;
@@ -225,7 +211,7 @@ class Deck{
   }
 
   /** Creates an empty deck object ready to be populated.*/
-  makeDeck(){
+  makeDeck() {
     //makes a tree/queus structure
     return {
       counts: {
@@ -254,153 +240,227 @@ let d = {
   name: 'The Modern Language',
   subject: 'All the language you must know to understand the modern world.',
   deck: [
-    {question:'bb',
+    {
+      question: 'bb',
       answer: 'Big Brother',
       wrongAnswers: ['Boing Boing', 'crimethink', 'A playful name for a lover.']
     },
-    {question:'Duckspeak',
+    {
+      question: 'Duckspeak',
       answer: 'to speak without thinking',
-      wrongAnswers: ['To quack like a duck.', 'To quack like a bear.', 'Unnecessarily aggressive and antisocial speech.']
+      wrongAnswers: [
+        'To quack like a duck.',
+        'To quack like a bear.',
+        'Unnecessarily aggressive and antisocial speech.'
+      ]
     },
-    {question:'Malquoted',
+    {
+      question: 'Malquoted',
       answer: 'Untrue claims about the powers that be',
-      wrongAnswers: ['An improper string',
+      wrongAnswers: [
+        'An improper string',
         'A breed of dog',
-        'Something something \'verse']
+        "Something something 'verse"
+      ]
     },
-    {question:'Oldthink',
+    {
+      question: 'Oldthink',
       answer: 'Thoughts that belong only in history, before the modern regime',
-      wrongAnswers: ['What happens when someone suffers from Alzheimers',
+      wrongAnswers: [
+        'What happens when someone suffers from Alzheimers',
         'A punk rock band from Ingersoll',
-        'Facts which are now considered wrong.']
+        'Facts which are now considered wrong.'
+      ]
     },
-    {question:'Upsub',
+    {
+      question: 'Upsub',
       answer: 'To submit to a higher authority.',
-      wrongAnswers: ['To upvote a submission',
+      wrongAnswers: [
+        'To upvote a submission',
         'When an underwater craft breaks the surface of the water.',
-        'To fulfill your fiduciary monetary requirements.']
+        'To fulfill your fiduciary monetary requirements.'
+      ]
     },
-    {question:'Facecrime',
+    {
+      question: 'Facecrime',
       answer: 'An indication that a person has committed thoughtcrime.',
-      wrongAnswers: ['To be really, really  ugly.',
+      wrongAnswers: [
+        'To be really, really  ugly.',
         'To wear disallowed hairstyles or makeup.',
-        'To say thoughtcrime.']
+        'To say thoughtcrime.'
+      ]
     },
-    {question:'Ownlife',
+    {
+      question: 'Ownlife',
       answer: 'To properly appreciate being alone and individualistic',
-      wrongAnswers: ['A group that routinely commits thoughtcrime.',
+      wrongAnswers: [
+        'A group that routinely commits thoughtcrime.',
         'A nutritional supplement company',
-        'To strive to the the best that you can be.']
+        'To strive to the the best that you can be.'
+      ]
     },
-    {question:'Goodthink',
-      answer: 'To properly align with the reality as put forth by the powers that be.',
-      wrongAnswers: ['To have a really good idea.',
+    {
+      question: 'Goodthink',
+      answer:
+        'To properly align with the reality as put forth by the powers that be.',
+      wrongAnswers: [
+        'To have a really good idea.',
         'To commit deep thoughtcrime',
-        'A candy bar manufactured in Guongzhao.']
+        'A candy bar manufactured in Guongzhao.'
+      ]
     },
-    {question:'Exit Strategy',
-      answer: 'To have a plan to leave one\'s current situation.',
-      wrongAnswers: ['The proper procedure for leaving the highway',
+    {
+      question: 'Exit Strategy',
+      answer: "To have a plan to leave one's current situation.",
+      wrongAnswers: [
+        'The proper procedure for leaving the highway',
         'A business move that involves a golden parachute',
-        'To flip the table when you lose a game.']
+        'To flip the table when you lose a game.'
+      ]
     },
-    {question:'Multiple Intelligences',
+    {
+      question: 'Multiple Intelligences',
       answer: 'To be competent in many different intelligence modalities.',
-      wrongAnswers: ['To have two equally good ideas',
+      wrongAnswers: [
+        'To have two equally good ideas',
         'Bringing the team together to tackle a particualrly thorny problem.',
-        'When a team is not harmonically synchronized for maximum synergy.']
+        'When a team is not harmonically synchronized for maximum synergy.'
+      ]
     },
-    {question:'Holistic Approach',
+    {
+      question: 'Holistic Approach',
       answer: 'To address the entirety of a problem at once.',
-      wrongAnswers: ['To simplify a problem by breaking it into smaller pieces.',
+      wrongAnswers: [
+        'To simplify a problem by breaking it into smaller pieces.',
         'A medical approach to health that focuses on minimizing the stressors that cause toxins to accumulate in your body.',
-        'To aggressively take over a niche through massive buildout and dirty tactics.']
+        'To aggressively take over a niche through massive buildout and dirty tactics.'
+      ]
     },
-    {question:'Sea Change',
-      answer: 'When the current environment shifts in such a way that some strategies are no longer viable.',
-      wrongAnswers: ['The most worrying part of global warming.',
+    {
+      question: 'Sea Change',
+      answer:
+        'When the current environment shifts in such a way that some strategies are no longer viable.',
+      wrongAnswers: [
+        'The most worrying part of global warming.',
         'To pivot your company to a new heading.',
-        'To transfer your business to a new, distant location.']
+        'To transfer your business to a new, distant location.'
+      ]
     },
-    {question:'Potempkin Villiage',
-      answer: 'To deceive others into thinking things are better than they are.',
-      wrongAnswers: ['The capital city of Palau',
+    {
+      question: 'Potempkin Villiage',
+      answer:
+        'To deceive others into thinking things are better than they are.',
+      wrongAnswers: [
+        'The capital city of Palau',
         'When a new idea takes over an old one due to a vocal minority.',
-        'To create a sense of false prosperity for outsiders.']
+        'To create a sense of false prosperity for outsiders.'
+      ]
     },
-    {question:'Knowledge Process Outsourcing',
+    {
+      question: 'Knowledge Process Outsourcing',
       answer: 'To outsource information services to an external company.',
-      wrongAnswers: ['To outsource management to an overseas entity.',
+      wrongAnswers: [
+        'To outsource management to an overseas entity.',
         'To bring in new talent to tackle a troubling problem.',
-        'A form of data binding popular in big data startups.']
+        'A form of data binding popular in big data startups.'
+      ]
     },
-    {question:'Long Tail',
+    {
+      question: 'Long Tail',
       answer: 'Any grouping that falls outside of the center of a bell curve.',
-      wrongAnswers: ['A delayed packet that halts program execuion',
+      wrongAnswers: [
+        'A delayed packet that halts program execuion',
         'A shot popular in tech hubs spiked with Modafinil.',
-        'To successfully balance tricky and sometimes competing goals.']
+        'To successfully balance tricky and sometimes competing goals.'
+      ]
     },
-    {question:'Storytelling',
+    {
+      question: 'Storytelling',
       answer: 'To put forth a story about your business.',
-      wrongAnswers: ['To misdirect with a half-truth.',
+      wrongAnswers: [
+        'To misdirect with a half-truth.',
         'To relay critical information in monologue format.',
-        'To entertain with a witty anecdote.']
+        'To entertain with a witty anecdote.'
+      ]
     },
-    {question:'Rightshoring',
-      answer: 'To properly locate the best place to locate your IT and manufacturing needs.',
-      wrongAnswers: ['To always keep the goal in sight and properly maintain project scope.',
+    {
+      question: 'Rightshoring',
+      answer:
+        'To properly locate the best place to locate your IT and manufacturing needs.',
+      wrongAnswers: [
+        'To always keep the goal in sight and properly maintain project scope.',
         'To locate your data centers close to your largest customer base.',
-        'A form of data packing which results in short average retrieval time but with a long tail.']
+        'A form of data packing which results in short average retrieval time but with a long tail.'
+      ]
     },
-    {question:'U+1F648; U+1F649; U+1F64A;',
+    {
+      question: 'U+1F648; U+1F649; U+1F64A;',
       answer: 'See no evil, hear no evil, do no evil.',
-      wrongAnswers: ['\'I just watched a scary scene!\'',
-        'I\'m at a club full of old people dancing!',
-        'This band is lit!']
+      wrongAnswers: [
+        "'I just watched a scary scene!'",
+        "I'm at a club full of old people dancing!",
+        'This band is lit!'
+      ]
     },
-    {question:'U+1F63B;',
+    {
+      question: 'U+1F63B;',
       answer: 'love!',
-      wrongAnswers: ['You/I see the world through rose-colored glasses.',
+      wrongAnswers: [
+        'You/I see the world through rose-colored glasses.',
         'I just swooned!',
-        'My blood sugar is over 9,000!']
+        'My blood sugar is over 9,000!'
+      ]
     },
-    {question:'U+2744;',
+    {
+      question: 'U+2744;',
       answer: 'Its cold!',
-      wrongAnswers: ['I just got frozen out by a cute girl.',
-        'I\'m totally lost.',
-        'I just scored!']
+      wrongAnswers: [
+        'I just got frozen out by a cute girl.',
+        "I'm totally lost.",
+        'I just scored!'
+      ]
     },
-    {question:'U+27B0;',
+    {
+      question: 'U+27B0;',
       answer: 'I went out of my way',
-      wrongAnswers: ['I\'m exiting the highway.',
-        'Onion',
-        'crossed wires']
+      wrongAnswers: ["I'm exiting the highway.", 'Onion', 'crossed wires']
     },
-    {question:'U+261D;',
+    {
+      question: 'U+261D;',
       answer: 'pointing',
-      wrongAnswers: ['Is it a bird?  Is it a plane?  No, its...',
+      wrongAnswers: [
+        'Is it a bird?  Is it a plane?  No, its...',
         'A more polite way to ask someone to leave you alone.',
-        'A gang sign for the Rowdy Nippers.']
+        'A gang sign for the Rowdy Nippers.'
+      ]
     },
-    {question:'U+264B;',
+    {
+      question: 'U+264B;',
       answer: 'Cancer',
-      wrongAnswers: ['My girlfriend is pregant!',
+      wrongAnswers: [
+        'My girlfriend is pregant!',
         'Allegedly',
-        'circling the point without getting to it.']
+        'circling the point without getting to it.'
+      ]
     },
-    {question:'U+3030;',
+    {
+      question: 'U+3030;',
       answer: 'I  Moustache You a Question!',
-      wrongAnswers: ['Its roughly that',
+      wrongAnswers: [
+        'Its roughly that',
         'It was a long and windy road.',
-        'The seas are rough.']
+        'The seas are rough.'
+      ]
     },
-    {question:'U+1F346;',
+    {
+      question: 'U+1F346;',
       answer: 'References male anatomy',
-      wrongAnswers: ['I left my food out too long.',
+      wrongAnswers: [
+        'I left my food out too long.',
         'Metrosexual',
-        'I\'m vegetarian']
-    },
-
+        "I'm vegetarian"
+      ]
+    }
   ]
 };
 
@@ -455,8 +515,6 @@ console.log(test);
 //     console.log('SUCCESS! Posted', event.data.ref);
 //   });
 // });
-
-
 
 /*
 // Listens for new messages added to /messages/:pushId/original and creates an
@@ -514,53 +572,94 @@ exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
 
 // });
 
-
 exports.correctAnswer = functions.https.onRequest((req, res) => {
-  admin.database().ref('/decks').child(req.params.uid).once('value').then(snapshot => {
-    let dbDeck = snapshot.val();
-    let phDeck = new Deck(d);
-    phDeck.answeredQuestionCorrectly(dbDeck);
-    return dbDeck;
-  })
-  .then(dbDeck => {
-    admin.database().ref('/decks').child(req.params.uid).set({deck: dbDeck})
-  })
-  .then(() => res.status('200').send())
-  .catch(err => console.error(err));
-});
-
-exports.incorrectAnswer = functions.https.onRequest((req, res) => {
-  admin.database().ref('/decks').child(req.params.uid).once('value').then(snapshot => {
-    let dbDeck = snapshot.val();
-    let phDeck = new Deck(d);
-    phDeck.answeredQuestionIncorrectly(dbDeck);
-    return dbDeck;
-  })
-  .then(dbDeck => {
-    admin.database().ref('/decks').child(req.params.uid).set({deck: dbDeck});
-  })
+  admin
+    .database()
+    .ref('/decks')
+    .child(req.params.uid)
+    .once('value')
+    .then(snapshot => {
+      let dbDeck = snapshot.val();
+      let phDeck = new Deck(d);
+      phDeck.answeredQuestionCorrectly(dbDeck);
+      return dbDeck;
+    })
+    .then(dbDeck => {
+      admin
+        .database()
+        .ref('/decks')
+        .child(req.params.uid)
+        .set({ deck: dbDeck });
+    })
     .then(() => res.status('200').send())
     .catch(err => console.error(err));
 });
-
-exports.getFirst = functions.https.onRequest((req, res) => {
-  admin.database().ref('/decks').child(req.params.uid).once('value').then(snapshot => {
-    let dbDeck = snapshot.val();
-    let phDeck = new Deck(d);
-    return phDeck.fetchFirst('now', dbDeck);
-  })
-  .then(item => res.status('200').json(item))
-  .catch(err => console.error(err));
+exports.incorrectAnswer = functions.https.onRequest((req, res) => {
+  admin
+    .database()
+    .ref('/decks')
+    .child(req.params.uid)
+    .once('value')
+    .then(snapshot => {
+      let dbDeck = snapshot.val();
+      let phDeck = new Deck(d);
+      phDeck.answeredQuestionIncorrectly(dbDeck);
+      return dbDeck;
+    })
+    .then(dbDeck => {
+      admin
+        .database()
+        .ref('/decks')
+        .child(req.params.uid)
+        .set({ deck: dbDeck });
+    })
+    .then(() => res.status('200').send())
+    .catch(err => console.error(err));
 });
- @dakotabryant
-  
-            
- 
-Write  Preview
-
-Leave a comment
-Attach files by dragging & dropping,  Choose Files selecting them, or pasting from the clipboard.
- Styling with Markdown is supported
-Comment
-Contact GitHub API Training Shop Blog About
-© 2017 GitHub, Inc. Terms Privacy Security Status Help
+exports.getFirst = functions.https.onRequest((req, res) => {
+  admin
+    .database()
+    .ref('/decks')
+    .child(req.params.uid)
+    .once('value')
+    .then(snapshot => {
+      let dbDeck = snapshot.val();
+      let phDeck = new Deck(d);
+      return phDeck.fetchFirst('now', dbDeck);
+    })
+    .then(item => res.status('200').json(item))
+    .catch(() => {
+      return admin
+        .database()
+        .ref(`/decks/${req.params.uid}`)
+        .set({ deck: new Deck(d) });
+    })
+    .then(data => {
+      let dbDeck = data.val();
+      let phDeck = new Deck(d);
+      return phDeck.fetchFirst('now', dbDeck);
+    })
+    .catch(err => console.error(err));
+});
+exports.initializeQuiz = functions.database.ref('users').onWrite(event => {
+  const data = event.data.val();
+  let dbDeck = new Deck(d);
+  return admin
+    .database()
+    .ref('/decks')
+    .child(data.uid)
+    .set({ deck: dbDeck })
+    .catch(err => console.error(err));
+});
+exports.createMockData = functions.https.onRequest((req, res) => {
+  cors((req, res, () => {
+    let obj = req.body;
+      admin
+      .database()
+      .ref('/users')
+      .child(obj.uid)
+      .then(snapshot => {
+        return res.status(200)
+      })
+  }));
+});
