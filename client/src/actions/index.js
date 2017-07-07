@@ -64,8 +64,38 @@ export const createMockData = user => {
       return res.json();
     })
     .then(data => {
+      store.dispatch(getFirst(data))
       return data;
     });
+};
+
+export const correctAnswer = user => {
+  fetch(`${cloudFunctions}answeredQuestionCorrectly/`, {
+    headers,
+    method: 'put',
+    body: JSON.stringify(user)
+  })
+  .then(res => {
+    return res.json();
+  })
+  .then(data => {
+    store.dispatch(getQuestionSuccess(data));
+    return data;
+  });
+};
+export const incorrectAnswer = user => {
+  fetch(`${cloudFunctions}answeredQuestionIncorrectly/?uid=${user.uid}`, {
+    headers,
+    method: 'put',
+    body: JSON.stringify(user)
+  })
+  .then(res => {
+    return res.json();
+  })
+  .then(data => {
+    store.dispatch(getQuestionSuccess(data));
+    return data;
+  });
 };
 
 export const googleLoginRequest = () => {
