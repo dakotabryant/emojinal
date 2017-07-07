@@ -632,6 +632,7 @@ exports.getFirst = functions.https.onRequest((req, res) => {
       return admin
         .database()
         .ref(`/decks/${req.params.uid}`)
+        .child('deck')
         .set({ deck: new Deck(d) });
     })
     .then(data => {
@@ -652,16 +653,17 @@ exports.initializeQuiz = functions.database.ref('users').onWrite(event => {
     .catch(err => console.error(err));
 });
 exports.createMockData = functions.https.onRequest((req, res) => {
+  cors(req, res, () => {
     let obj = req.body;
     let _res = res;
-      return admin
+    return admin
       .database()
-      .ref('/users')
+      .ref('/decks')
       .child(obj.uid)
       .set(obj)
       .then(() => {
-        res.status(200).end()
+        res.status(200).end();
       })
-      .catch(err => console.error(err))
-      
+      .catch(err => console.error(err));
+  });
 });

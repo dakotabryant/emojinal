@@ -44,6 +44,9 @@ export const createMockData = user => {
 		method: 'put',
     body: JSON.stringify(user)
   }).then(res => {
+		console.log('====================================');
+		console.log('I came back!');
+		console.log('====================================');
     return res;
   });
 };
