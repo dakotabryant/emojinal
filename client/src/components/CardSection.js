@@ -3,25 +3,29 @@ import { connect } from 'react-redux';
 import { getFirst, createMockData } from '../actions';
 
 class CardSection extends Component {
-  componentDidMount() {
+  _getQuestions = () => {
     let user = {
       displayName: this.props.currentUser.displayName,
       uid: this.props.currentUser.uid
     };
-    this.props.dispatch(getFirst(user))
-  }
-  showContent() {
+    this.props.dispatch(getFirst(user));
+  };
+  render() {
     const { wrongAnswers, correctAnswer, questionText } = this.props.question;
-    
-    if (this.props.question.correctAnswer != null) {
-      const answers = wrongAnswers.map(answer => {
+    console.log(wrongAnswers);
+    const answers = wrongAnswers.map(answer => {
       return (
         <label htmlFor={answer}>
+          {answer}
           <input type="radio" name={answer} />
         </label>
       );
     });
-      return (
+    let cardSectionContent = (
+      <button onClick={this._getQuestions}>Start Game</button>
+    );
+    if (this.props.question.correctAnswer != null) {
+      cardSectionContent = (
         <div>
           <form>
             <p>
@@ -29,6 +33,7 @@ class CardSection extends Component {
             </p>
             <div>
               <label htmlFor="correctAnswer">
+                {correctAnswer}
                 <input type="radio" name={correctAnswer} />
               </label>
               {answers}
@@ -38,12 +43,9 @@ class CardSection extends Component {
         </div>
       );
     }
-    return <h3>Loading</h3>;
-  }
-  render() {
     return (
       <div>
-        {this.showContent()}
+        {cardSectionContent}
       </div>
     );
   }

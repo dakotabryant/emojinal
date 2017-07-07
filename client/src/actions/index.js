@@ -64,7 +64,6 @@ export const createMockData = user => {
       return res.json();
     })
     .then(data => {
-      console.log(data);
       return data;
     });
 };
