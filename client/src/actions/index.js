@@ -29,28 +29,44 @@ export const userLoginSuccess = user => {
 export const userLoginFailure = () => ({
   type: 'USER_LOGIN_FAILURE'
 });
-export const getQuestion = uid => {
-  fetch(`${cloudFunctions}getFirst`).then(res => {});
-};
+export const getQuestionSuccess = question => ({
+  type: 'GET_QUESTION_SUCCESS',
+  question
+});
 
 const headers = {
   Accept: 'application/json',
   'Content-Type': 'application/json'
 };
 
+export const getFirst = user => {
+  fetch(`${cloudFunctions}getFirst`, {
+    headers,
+    method: 'put',
+    body: JSON.stringify(user)
+  })
+    .then(res => {
+      return res.json();
+    })
+    .then(data => {
+      console.log(data);
+      store.dispatch(getQuestionSuccess(data));
+      return data;
+    });
+};
 export const createMockData = user => {
   fetch(`${cloudFunctions}createMockData`, {
     headers,
-		method: 'put',
+    method: 'put',
     body: JSON.stringify(user)
   })
-	.then(res => {
-    return res.json()
-  })
-	.then(data => {
-			console.log(data);
-			return data
-		})
+    .then(res => {
+      return res.json();
+    })
+    .then(data => {
+      console.log(data);
+      return data;
+    });
 };
 
 export const googleLoginRequest = () => {

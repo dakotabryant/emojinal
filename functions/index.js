@@ -617,46 +617,42 @@ exports.incorrectAnswer = functions.https.onRequest((req, res) => {
     .catch(err => console.error(err));
 });
 exports.getFirst = functions.https.onRequest((req, res) => {
-  admin
-    .database()
-    .ref('/decks')
-    .child(req.params.uid)
-    .once('value')
-    .then(snapshot => {
-      let dbDeck = snapshot.val();
-      let phDeck = new Deck(d);
-      return phDeck.fetchFirst('now', dbDeck);
-    })
-    .then(item => res.status('200').json(item))
-    .catch(() => {
-      return admin
-        .database()
-        .ref(`/decks/${req.params.uid}`)
-        .child('deck')
-        .set({ deck: new Deck(d) });
-    })
-    .then(data => {
-      let dbDeck = data.val();
-      let phDeck = new Deck(d);
-      return phDeck.fetchFirst('now', dbDeck);
-    })
-    .catch(err => console.error(err));
+  cors(req, res, () => {
+    admin
+      .database()
+      .ref(`/decks/${req.body.uid}`)
+      .child('deck')
+      .once('value')
+      .then(snapshot => {
+        let dbDeck = snapshot.val();
+        console.log(`this is the dbDeck: ${dbDeck}`)
+        let phDeck = new Deck(d);
+        console.log(`this is the phDeck: ${phDeck}`)
+        let newDeck = phDeck.fetchFirst('now', dbDeck.deck);
+        console.log(`this is the newDeck: ${newDeck}`)
+
+        return res.status(200).json(newDeck).end();
+      })
+      .catch(err => console.error(err));
+  });
 });
-exports.initializeQuiz = functions.database.ref('/decks/{uid}').onWrite(event => {
-  if(event.data.previous.exists()) {
-    return;
-  }
-  if (!event.data.exists()) {
-    return;
-  }
-  let dbDeck = new Deck(d);
-  const ref = admin.database().ref(`/decks/${event.params.uid}`)
-  return admin
-    .database()
-    .ref(`/decks/${event.params.uid}`)
-    .update({ deck: dbDeck })
-    .catch(err => console.error(err));
-});
+
+exports.initializeQuiz = functions.database
+  .ref('/decks/{uid}')
+  .onWrite(event => {
+    if (event.data.previous.exists()) {
+      return;
+    }
+    if (!event.data.exists()) {
+      return;
+    }
+    let dbDeck = new Deck(d);
+    return admin
+      .database()
+      .ref(`/decks/${event.params.uid}`)
+      .update({ deck: dbDeck })
+      .catch(err => console.error(err));
+  });
 exports.createMockData = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
     let obj = req.body;

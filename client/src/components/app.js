@@ -9,7 +9,8 @@ import {
   userLoginRequest,
   userLoginFailure,
   userLoginSuccess,
-  showLoginForm
+  showLoginForm,
+  createMockData
 } from '../actions';
 
 class App extends React.Component {
@@ -45,7 +46,7 @@ class App extends React.Component {
       return <LoginForm onClick={this.logInRequest.bind(this)} />;
     } else if (this.props.loggedIn) {
       return <CardSection />;
-    } else {
+    } else if (!this.props.loggedIn && !this.props.showLoginForm) {
       return (
         <div>
           <h1>Emojinal</h1>
