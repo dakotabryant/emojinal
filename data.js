@@ -1,4 +1,4 @@
-export default {
+{
   "name": "The Modern Language",
   "subject": "All the language you must know to understand the modern world.",
   "deck": [
