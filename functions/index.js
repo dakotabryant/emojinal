@@ -652,14 +652,16 @@ exports.initializeQuiz = functions.database.ref('users').onWrite(event => {
     .catch(err => console.error(err));
 });
 exports.createMockData = functions.https.onRequest((req, res) => {
-  cors((req, res, () => {
     let obj = req.body;
-      admin
+    let _res = res;
+      return admin
       .database()
       .ref('/users')
       .child(obj.uid)
-      .then(snapshot => {
-        return res.status(200)
+      .set(obj)
+      .then(() => {
+        res.status(200).end()
       })
-  }));
+      .catch(err => console.error(err))
+      
 });
