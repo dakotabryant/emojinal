@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const cors = require('cors');
+const cors = require('cors')({ origin: true });
 // const Deck = require('./algo');
 admin.initializeApp(functions.config().firebase);
 //this is a temp file for experimenting with the datastructure and
@@ -642,27 +642,32 @@ exports.getFirst = functions.https.onRequest((req, res) => {
     })
     .catch(err => console.error(err));
 });
-exports.initializeQuiz = functions.database.ref('users').onWrite(event => {
-  const data = event.data.val();
+exports.initializeQuiz = functions.database.ref('/decks/{uid}').onWrite(event => {
+  if(event.data.previous.exists()) {
+    return;
+  }
+  if (!event.data.exists()) {
+    return;
+  }
   let dbDeck = new Deck(d);
+  const ref = admin.database().ref(`/decks/${event.params.uid}`)
   return admin
     .database()
-    .ref('/decks')
-    .child(data.uid)
-    .set({ deck: dbDeck })
+    .ref(`/decks/${event.params.uid}`)
+    .update({ deck: dbDeck })
     .catch(err => console.error(err));
 });
 exports.createMockData = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
     let obj = req.body;
-    let _res = res;
-    return admin
-      .database()
-      .ref('/decks')
-      .child(obj.uid)
+    const ref = admin.database().ref('/decks').child(obj.uid);
+    return ref
       .set(obj)
       .then(() => {
-        res.status(200).end();
+        return ref.once('value');
+      })
+      .then(snap => {
+        return res.status(200).json(snap.val()).end();
       })
       .catch(err => console.error(err));
   });

@@ -43,12 +43,14 @@ export const createMockData = user => {
     headers,
 		method: 'put',
     body: JSON.stringify(user)
-  }).then(res => {
-		console.log('====================================');
-		console.log('I came back!');
-		console.log('====================================');
-    return res;
-  });
+  })
+	.then(res => {
+    return res.json()
+  })
+	.then(data => {
+			console.log(data);
+			return data
+		})
 };
 
 export const googleLoginRequest = () => {
