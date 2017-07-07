@@ -9,6 +9,9 @@ export const initiateLogIn = () => ({
 export const showLoginForm = () => ({
   type: 'SHOW_LOGIN_FORM'
 });
+export const logOut = () => ({
+  type: 'LOG_OUT'
+});
 
 export const userLoginRequest = () => ({
   type: 'USER_LOGIN_REQUEST'

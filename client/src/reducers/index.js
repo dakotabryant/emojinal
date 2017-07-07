@@ -5,7 +5,11 @@ const initialState = {
   currentUser: {
     isLogged: false
   },
-  currentQuestion: null,
+  currentQuestion: {
+    correctAnswer: '',
+    wrongAnswers: [],
+    questionText: '' 
+  },
   questions: null
 };
 
