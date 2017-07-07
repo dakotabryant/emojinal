@@ -22,6 +22,8 @@ class Deck{
     this.name = data.name;
     this.subject = data.subject;
     this.deck = this.makeDeck();
+    console.log("-")
+    this.deck.scoresOverTime[0].toLearn = data.deck.length;
     this.populateDeck(data);
     this.stageCards(5, this.deck);
   }
@@ -70,7 +72,7 @@ class Deck{
     }
   }
 
-  /** calls the checkStackforDueCards function on all stacks
+  /** calls the checkStackforDueCards function on all stacks.  Also creates charts for learned and unlearned.
   * @param {object} deck - Optional argument to target a specific deck.  Defaults to current deck.
   */
   checkAllStackforDueCards(deck = this.deck){
@@ -78,6 +80,16 @@ class Deck{
     this.checkStackforDueCards("soonish", deck);
     this.checkStackforDueCards("later", deck);
     this.checkStackforDueCards("learned", deck);
+
+    //evaluates whether to add in a new entry to the data logging
+    if(Date.now()>deck.scoresOverTime[deck.scoresOverTime.length-1].date+60000){
+      //create an entry
+      deck.scoresOverTime.push({
+        date: Date.now(),
+        learned: deck.counts.learned,
+        toLearn: deck.counts.unstaged
+      });
+    }
   }
 
   /** populates the deck from the provided json object
@@ -87,6 +99,8 @@ class Deck{
     data.deck.forEach(el => {
       this.add(el, "unstaged");
     })
+    //add the unstaged count into the counts object
+    this.deck.counts.unstaged = data.deck.length;
   }
 
   /** Adds a card to the target deck.  Calls makeCard to turn data into a new card.
@@ -174,6 +188,7 @@ class Deck{
       this.switchStack("unstaged", "now", deck);
     }
     deck.counts["now"] += num;
+    deck.counts["unstaged"] -= num;
   }
 
   /** Move face card from one stack to the end of another and manage count
@@ -212,8 +227,16 @@ class Deck{
         soon: 0,
         soonish: 0,
         later: 0,
-        learned: 0
+        learned: 0,
+        unstaged: 0
       },
+      scoresOverTime: [
+        {
+          date: Date.now(),
+          learned: 0,
+          toLearn: 0
+        }
+      ],
       now: null,
       //two hours
       soon: null,
