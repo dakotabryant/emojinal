@@ -5,7 +5,11 @@ const initialState = {
   currentUser: {
     isLogged: false
   },
-  currentQuestion: null,
+  currentQuestion: {
+    correctAnswer: '',
+    wrongAnswers: [],
+    questionText: ''
+  },
   questions: null
 };
 
@@ -44,6 +48,26 @@ const reducer = (state = initialState, action) => {
         currentUser: {
           isLogged: false
         }
+      };
+    case 'GET_QUESTION':
+      return {
+        ...state,
+        loading: true
+      };
+    case 'GET_QUESTION_SUCESS':
+      return {
+        ...state,
+        loading: false,
+        currentQuestion: {
+          correctAnswer: action.question.correctAnswer,
+          wrongAnswers: [...action.question.wrongAnswers],
+          questionText: action.question.questionText
+        }
+      };
+    case 'GET_QUESTION_FAILURE':
+      return {
+        ...state,
+        loading: false
       };
     default:
       return state;

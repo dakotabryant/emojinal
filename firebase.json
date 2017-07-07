@@ -1,35 +1,30 @@
 {
-  // "rules": {
-    
-  //   ".read": true,
-  //   ".write": true
-  // },
-    "hosting": {
-    "public": "./",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**",
-      "functions"
+  "hosting": {
+    "public": "./client/public",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ]
   },
-      "rules":{
-        "users":{
-          ".read": true,
-          ".write": true      
-        }
-    },
-  "questions":{
+  "rules": {
+    "users": {
+      ".read": true,
+      ".write": true
+    }
+  },
+  "questions": {
     "hello": true
   },
-  "users":{
-
-    "$username":{
+  "users": {
+    "$username": {
       "uid": true,
       "name": true,
       "email": true
     }
-  } 
-  
-
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
 }
