@@ -572,49 +572,50 @@ exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
 
 // });
 
-exports.correctAnswer = functions.https.onRequest((req, res) => {
+exports.answeredQuestionCorrectly = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
-    let ref = admin.database().ref(`/decks/${req.body.uid}`);
+    let ref = admin.database().ref(`/decks/${req.body.uid}`).child('deck');
     ref
       .once('value')
       .then(snap => {
         let dbDeck = snap.val();
         let phDeck = new Deck(d);
         phDeck.answeredQuestionCorrectly(dbDeck.deck['now'], dbDeck.deck);
-        return dbDeck;
-      })
-      .then(dbDeck => {
-        ref.set({ deck: dbDeck });
+        return ref.set({ deck: dbDeck });
       })
       .then(() => ref.once('value'))
       .then(snap => {
+        // res.set('Access-Control-Allow-Origin', "*");
+        // res.set('Access-Control-Allow-Methods', 'GET, PUT');
         let phDeck = new Deck(d);
-        return phDeck.fetchFirst('now', snap.val().deck);
+        let dbDeck = snap.val();
+        let newDeck = phDeck.fetchFirst('now', dbDeck.deck);
+        return res.status(200).json(newDeck).end();
       })
-      .then(item => res.status('201').json(item))
       .catch(err => console.error(err));
   });
 });
-exports.incorrectAnswer = functions.https.onRequest((req, res) => {
+exports.answeredQuestionIncorrectly = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
-    let ref = admin.database().ref(`/decks/${req.body.uid}`);
+    let ref = admin.database().ref(`/decks/${req.body.uid}`).child('deck');
     ref
       .once('value')
       .then(snap => {
         let dbDeck = snap.val();
         let phDeck = new Deck(d);
         phDeck.answeredQuestionIncorrectly(dbDeck.deck['now'], dbDeck.deck);
-        return dbDeck;
-      })
-      .then(dbDeck => {
-        ref.set({ deck: dbDeck });
+        return ref.set({ deck: dbDeck });
       })
       .then(() => ref.once('value'))
+      .then(() => ref.once('value'))
       .then(snap => {
+        // res.set('Access-Control-Allow-Origin', "*");
+        // res.set('Access-Control-Allow-Methods', 'GET, PUT');
         let phDeck = new Deck(d);
-        return phDeck.fetchFirst('now', snap.val().deck);
+        let dbDeck = snap.val();
+        let newDeck = phDeck.fetchFirst('now', dbDeck.deck);
+        return res.status(200).json(newDeck).end();
       })
-      .then(item => res.status('201').json(item))
       .catch(err => console.error(err));
   });
 });
